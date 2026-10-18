@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MiniShop — Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+
+  <!-- <LoginPage /> : public route. If already authenticated, redirect to the page the user came from. -->
+  <main class="grid min-h-screen lg:grid-cols-2">
+
+    <!-- Brand side (hidden on mobile) -->
+    <section class="hidden flex-col justify-between bg-indigo-600 p-12 text-indigo-50 lg:flex">
+      <a href="index.html" class="flex items-center gap-2 text-lg font-semibold text-white">
+        <span class="grid size-9 place-items-center rounded-lg bg-white text-indigo-600">M</span>
+        MiniShop
+      </a>
+      <div>
+        <h1 class="text-3xl font-bold leading-tight text-white">Sign in to finish your order.</h1>
+        <p class="mt-3 max-w-sm text-indigo-100">Your cart is kept while you log in.</p>
+      </div>
+      <p class="text-sm text-indigo-200">Test account: eve.holt@reqres.in / cityslicka</p>
+    </section>
+
+    <!-- Form side -->
+    <section class="flex items-center justify-center px-4 py-12">
+      <div class="w-full max-w-sm">
+        <h2 class="text-2xl font-bold tracking-tight">Welcome back</h2>
+        <p class="mt-1 text-sm text-slate-600">Enter your email and password.</p>
+
+        <!-- Redirect notice: shown when a protected route sent the user here -->
+        <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800" role="status">
+          You need to sign in to access <strong>Checkout</strong>.
+        </div>
+
+        <!-- <LoginForm /> -->
+        <form class="mt-6 space-y-5" novalidate>
+          <!-- API error (e.g. 400 "user not found") -->
+          <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+            Invalid email or password. Please try again.
+          </div>
+
+          <!-- Field: default state -->
+          <div>
+            <label for="email" class="block text-sm font-medium text-slate-700">Email</label>
+            <input id="email" type="email" autocomplete="email" placeholder="you@example.com"
+              class="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+          </div>
+
+          <!-- Field: invalid state (aria-invalid + aria-describedby) -->
+          <div>
+            <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+            <input id="password" type="password" autocomplete="current-password" aria-invalid="true" aria-describedby="password-error"
+              class="mt-1.5 block w-full rounded-lg border border-red-400 bg-white px-3 py-2 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20" />
+            <p id="password-error" class="mt-1.5 text-xs text-red-600">Password is required.</p>
+          </div>
+
+          <!-- Submit: idle -->
+          <button type="submit"
+            class="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            Sign in
+          </button>
+        </form>
+
+        <!-- ===== State reference: submitting ===== -->
+        <div class="mt-10 border-t border-dashed border-slate-300 pt-6">
+          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">State: submitting</p>
+          <button type="button" disabled aria-busy="true"
+            class="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-indigo-600/60 px-4 py-2.5 text-sm font-semibold text-white">
+            <svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"/>
+              <path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+            Signing in…
+          </button>
+        </div>
+
+        <!-- ===== State reference: restoring session on app start ===== -->
+        <div class="mt-6">
+          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">State: restoring session (auth.loading)</p>
+          <div class="flex items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white py-6 text-sm text-slate-500">
+            <span class="size-2 animate-pulse rounded-full bg-indigo-500"></span>
+            Checking your session…
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

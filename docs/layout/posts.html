@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MiniShop — Posts</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+
+  <!-- <AppHeader /> : shared across all authenticated pages -->
+  <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
+    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+      <a href="index.html" class="flex items-center gap-2 font-semibold">
+        <span class="grid size-8 place-items-center rounded-lg bg-indigo-600 text-white">M</span>
+        MiniShop
+      </a>
+      <nav class="hidden gap-6 text-sm font-medium md:flex">
+        <a href="posts.html" class="text-indigo-600" aria-current="page">Posts</a>
+        <a href="products.html" class="text-slate-600 hover:text-slate-900">Products</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="checkout.html" class="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100" aria-label="Cart, 3 items">
+          <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13 5.4 5M7 13l-2.3 2.3c-.6.6-.2 1.7.7 1.7H17m0 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/></svg>
+          <span class="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">3</span>
+        </a>
+        <div class="flex items-center gap-2 border-l border-slate-200 pl-3">
+          <span class="grid size-8 place-items-center rounded-full bg-slate-200 text-xs font-semibold">EH</span>
+          <button class="text-sm text-slate-600 hover:text-slate-900">Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- <PostsPage /> : wrapped by <PostsProvider> -->
+  <main class="mx-auto max-w-6xl px-4 py-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight">Posts</h1>
+        <p class="mt-1 text-sm text-slate-600">Data from JSONPlaceholder. New posts are added to the local list.</p>
+      </div>
+      <span class="rounded-full bg-slate-200 px-3 py-1 text-xs font-medium text-slate-700">100 posts</span>
+    </div>
+
+    <div class="mt-8 grid gap-8 lg:grid-cols-[360px_1fr]">
+
+      <!-- <CreatePostForm /> -->
+      <aside class="lg:sticky lg:top-24 lg:self-start">
+        <form class="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm" novalidate>
+          <h2 class="font-semibold">New post</h2>
+
+          <div>
+            <label for="title" class="block text-sm font-medium text-slate-700">Title</label>
+            <input id="title" type="text" value="Hi" aria-invalid="true" aria-describedby="title-error"
+              class="mt-1.5 block w-full rounded-lg border border-red-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20" />
+            <div class="mt-1.5 flex justify-between text-xs">
+              <p id="title-error" class="text-red-600">Title must have at least 5 characters.</p>
+              <span class="text-slate-400">2/100</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="body" class="block text-sm font-medium text-slate-700">Body</label>
+            <textarea id="body" rows="5" placeholder="Write something…"
+              class="mt-1.5 block w-full resize-none rounded-lg border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"></textarea>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button type="submit" class="flex-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60">
+              Publish
+            </button>
+            <button type="reset" class="rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100">Clear</button>
+          </div>
+
+          <!-- Success feedback after POST -->
+          <p class="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700" role="status">Post published.</p>
+        </form>
+      </aside>
+
+      <!-- <PostList /> -->
+      <section aria-labelledby="list-title">
+        <h2 id="list-title" class="sr-only">Post list</h2>
+        <ul class="space-y-3">
+          <!-- <PostItem /> : just created (highlight) -->
+          <li class="rounded-xl border border-indigo-200 bg-indigo-50/50 p-5">
+            <div class="flex items-center gap-2 text-xs text-slate-500">
+              <span class="rounded bg-indigo-600 px-1.5 py-0.5 font-semibold text-white">New</span>
+              <span>by Eve Holt</span>
+            </div>
+            <h3 class="mt-2 font-semibold">My first post from the form</h3>
+            <p class="mt-1 line-clamp-2 text-sm text-slate-600">This post was sent via POST and added to the list without reloading the page.</p>
+          </li>
+          <!-- <PostItem /> -->
+          <li class="rounded-xl border border-slate-200 bg-white p-5 transition hover:shadow-sm">
+            <div class="flex items-center justify-between text-xs text-slate-500">
+              <span>by Leanne Graham</span>
+              <span>4 comments</span>
+            </div>
+            <h3 class="mt-2 font-semibold capitalize">sunt aut facere repellat provident occaecati</h3>
+            <p class="mt-1 line-clamp-2 text-sm text-slate-600">quia et suscipit suscipit recusandae consequuntur expedita et cum reprehenderit molestiae ut ut quas totam nostrum rerum est autem sunt rem eveniet architecto</p>
+          </li>
+          <li class="rounded-xl border border-slate-200 bg-white p-5 transition hover:shadow-sm">
+            <div class="flex items-center justify-between text-xs text-slate-500">
+              <span>by Ervin Howell</span>
+              <span>5 comments</span>
+            </div>
+            <h3 class="mt-2 font-semibold capitalize">qui est esse</h3>
+            <p class="mt-1 line-clamp-2 text-sm text-slate-600">est rerum tempore vitae sequi sint nihil reprehenderit dolor beatae ea dolores neque fugiat blanditiis voluptate porro vel nihil molestiae</p>
+          </li>
+        </ul>
+
+        <!-- ===== State reference: loading (skeleton) ===== -->
+        <p class="mb-3 mt-12 text-xs font-semibold uppercase tracking-wider text-slate-400">State: loading</p>
+        <ul class="space-y-3" aria-busy="true" aria-label="Loading posts">
+          <li class="animate-pulse rounded-xl border border-slate-200 bg-white p-5">
+            <div class="h-3 w-24 rounded bg-slate-200"></div>
+            <div class="mt-3 h-4 w-2/3 rounded bg-slate-200"></div>
+            <div class="mt-2 h-3 w-full rounded bg-slate-100"></div>
+            <div class="mt-1.5 h-3 w-5/6 rounded bg-slate-100"></div>
+          </li>
+          <li class="animate-pulse rounded-xl border border-slate-200 bg-white p-5">
+            <div class="h-3 w-24 rounded bg-slate-200"></div>
+            <div class="mt-3 h-4 w-1/2 rounded bg-slate-200"></div>
+            <div class="mt-2 h-3 w-full rounded bg-slate-100"></div>
+            <div class="mt-1.5 h-3 w-4/6 rounded bg-slate-100"></div>
+          </li>
+        </ul>
+
+        <!-- ===== State reference: error ===== -->
+        <p class="mb-3 mt-12 text-xs font-semibold uppercase tracking-wider text-slate-400">State: error</p>
+        <div class="flex flex-col items-center rounded-xl border border-red-200 bg-white px-6 py-10 text-center" role="alert">
+          <span class="grid size-10 place-items-center rounded-full bg-red-100 text-lg text-red-600">!</span>
+          <h3 class="mt-3 font-semibold">We couldn't load the posts</h3>
+          <p class="mt-1 text-sm text-slate-600">Check your connection and try again.</p>
+          <button class="mt-4 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-50">Try again</button>
+        </div>
+
+        <!-- ===== State reference: empty ===== -->
+        <p class="mb-3 mt-12 text-xs font-semibold uppercase tracking-wider text-slate-400">State: empty</p>
+        <div class="rounded-xl border border-dashed border-slate-300 px-6 py-10 text-center text-sm text-slate-500">
+          No posts yet. Write the first one.
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

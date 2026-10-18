@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MiniShop — Products</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+
+  <!-- <AppHeader /> -->
+  <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+      <a href="index.html" class="flex items-center gap-2 font-semibold">
+        <span class="grid size-8 place-items-center rounded-lg bg-indigo-600 text-white">M</span>
+        MiniShop
+      </a>
+      <nav class="hidden gap-6 text-sm font-medium md:flex">
+        <a href="posts.html" class="text-slate-600 hover:text-slate-900">Posts</a>
+        <a href="products.html" class="text-indigo-600" aria-current="page">Products</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="checkout.html" class="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100" aria-label="Cart, 3 items">
+          <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13 5.4 5M7 13l-2.3 2.3c-.6.6-.2 1.7.7 1.7H17m0 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/></svg>
+          <span class="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">3</span>
+        </a>
+        <!-- Logged out variant of the user area -->
+        <a href="login.html" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50">Sign in</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- <ProductsPage /> -->
+  <main class="mx-auto max-w-7xl px-4 py-8">
+    <h1 class="text-2xl font-bold tracking-tight">Products</h1>
+
+    <!-- <ProductFilters /> : search (debounced) + category + price range -->
+    <section class="mt-6 grid gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_200px_auto]" aria-label="Filters">
+      <div class="relative">
+        <label for="search" class="sr-only">Search products</label>
+        <svg class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="m21 21-4.3-4.3M17 10.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z"/></svg>
+        <input id="search" type="search" value="phone" placeholder="Search products…"
+          class="block w-full rounded-lg border border-slate-300 py-2 pl-9 pr-24 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+        <!-- Shown while the debounced request is in flight -->
+        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">Searching…</span>
+      </div>
+
+      <div>
+        <label for="category" class="sr-only">Category</label>
+        <select id="category" class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+          <option>All categories</option>
+          <option selected>smartphones</option>
+          <option>laptops</option>
+          <option>fragrances</option>
+        </select>
+      </div>
+
+      <fieldset class="flex items-center gap-2">
+        <legend class="sr-only">Price range</legend>
+        <input type="number" placeholder="Min $" aria-label="Minimum price" value="100"
+          class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+        <span class="text-slate-400">–</span>
+        <input type="number" placeholder="Max $" aria-label="Maximum price"
+          class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
+      </fieldset>
+
+      <!-- Active filters -->
+      <div class="flex flex-wrap items-center gap-2 text-xs md:col-span-3">
+        <span class="text-slate-500">Active:</span>
+        <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 font-medium text-indigo-700">"phone" <button aria-label="Remove search filter">×</button></span>
+        <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 font-medium text-indigo-700">smartphones <button aria-label="Remove category filter">×</button></span>
+        <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 font-medium text-indigo-700">≥ $100 <button aria-label="Remove price filter">×</button></span>
+        <button class="ml-auto text-slate-500 underline hover:text-slate-800">Clear all</button>
+      </div>
+    </section>
+
+    <div class="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
+
+      <!-- <ProductGrid /> -->
+      <section aria-labelledby="results">
+        <p id="results" class="mb-4 text-sm text-slate-600">Showing <strong>1–12</strong> of <strong>23</strong> results</p>
+
+        <ul class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <!-- <ProductCard /> -->
+          <li class="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:shadow-md">
+            <div class="aspect-square bg-gradient-to-br from-slate-100 to-slate-200"></div>
+            <div class="flex flex-1 flex-col p-4">
+              <span class="text-xs font-medium uppercase tracking-wide text-slate-500">smartphones</span>
+              <h3 class="mt-1 font-semibold">iPhone 9</h3>
+              <p class="mt-1 line-clamp-2 text-sm text-slate-600">An Apple mobile which is nothing like Apple.</p>
+              <div class="mt-auto flex items-center justify-between pt-4">
+                <span class="text-lg font-bold">$549</span>
+                <button class="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500">Add</button>
+              </div>
+            </div>
+          </li>
+          <!-- <ProductCard /> : already in cart -->
+          <li class="group flex flex-col overflow-hidden rounded-xl border border-indigo-300 bg-white ring-1 ring-indigo-200">
+            <div class="aspect-square bg-gradient-to-br from-slate-100 to-slate-200"></div>
+            <div class="flex flex-1 flex-col p-4">
+              <span class="text-xs font-medium uppercase tracking-wide text-slate-500">smartphones</span>
+              <h3 class="mt-1 font-semibold">Samsung Universe 9</h3>
+              <p class="mt-1 line-clamp-2 text-sm text-slate-600">Samsung's new variant which goes beyond Galaxy to the Universe.</p>
+              <div class="mt-auto flex items-center justify-between pt-4">
+                <span class="text-lg font-bold">$1,249</span>
+                <span class="rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700">In cart (2)</span>
+              </div>
+            </div>
+          </li>
+          <li class="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:shadow-md">
+            <div class="aspect-square bg-gradient-to-br from-slate-100 to-slate-200"></div>
+            <div class="flex flex-1 flex-col p-4">
+              <span class="text-xs font-medium uppercase tracking-wide text-slate-500">smartphones</span>
+              <h3 class="mt-1 font-semibold">OPPO F19</h3>
+              <p class="mt-1 line-clamp-2 text-sm text-slate-600">OPPO F19 is officially announced on April 2021.</p>
+              <div class="mt-auto flex items-center justify-between pt-4">
+                <span class="text-lg font-bold">$280</span>
+                <button class="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500">Add</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+        <!-- <Pagination /> : limit=12, skip=(page-1)*12 -->
+        <nav class="mt-8 flex items-center justify-between" aria-label="Pagination">
+          <button disabled class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-50">← Previous</button>
+          <ol class="flex gap-1 text-sm">
+            <li><a href="#" aria-current="page" class="grid size-8 place-items-center rounded-lg bg-indigo-600 font-semibold text-white">1</a></li>
+            <li><a href="#" class="grid size-8 place-items-center rounded-lg hover:bg-slate-200">2</a></li>
+          </ol>
+          <button class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">Next →</button>
+        </nav>
+
+        <!-- ===== State reference: loading ===== -->
+        <p class="mb-3 mt-12 text-xs font-semibold uppercase tracking-wider text-slate-400">State: loading</p>
+        <ul class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true">
+          <li class="animate-pulse overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <div class="aspect-square bg-slate-200"></div>
+            <div class="space-y-2 p-4"><div class="h-3 w-16 rounded bg-slate-200"></div><div class="h-4 w-2/3 rounded bg-slate-200"></div><div class="h-3 w-full rounded bg-slate-100"></div></div>
+          </li>
+          <li class="animate-pulse overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <div class="aspect-square bg-slate-200"></div>
+            <div class="space-y-2 p-4"><div class="h-3 w-16 rounded bg-slate-200"></div><div class="h-4 w-1/2 rounded bg-slate-200"></div><div class="h-3 w-full rounded bg-slate-100"></div></div>
+          </li>
+        </ul>
+
+        <!-- ===== State reference: no results ===== -->
+        <p class="mb-3 mt-12 text-xs font-semibold uppercase tracking-wider text-slate-400">State: no results</p>
+        <div class="rounded-xl border border-dashed border-slate-300 px-6 py-10 text-center">
+          <h3 class="font-semibold">No products match your filters</h3>
+          <p class="mt-1 text-sm text-slate-600">Try another search term or widen the price range.</p>
+          <button class="mt-4 text-sm font-medium text-indigo-600 hover:underline">Clear filters</button>
+        </div>
+
+        <!-- ===== State reference: error ===== -->
+        <p class="mb-3 mt-12 text-xs font-semibold uppercase tracking-wider text-slate-400">State: error</p>
+        <div class="flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-5 py-4" role="alert">
+          <p class="text-sm text-red-700">Couldn't load products.</p>
+          <button class="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-red-700 ring-1 ring-red-200 hover:bg-red-100">Try again</button>
+        </div>
+      </section>
+
+      <!-- <CartPanel /> : reads CartContext. On mobile this becomes a drawer opened from the header icon. -->
+      <aside class="lg:sticky lg:top-24 lg:self-start" aria-labelledby="cart-title">
+        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+            <h2 id="cart-title" class="font-semibold">Your cart</h2>
+            <span class="text-sm text-slate-500">3 items</span>
+          </div>
+
+          <ul class="divide-y divide-slate-100 px-5">
+            <!-- <CartItem /> -->
+            <li class="flex gap-3 py-4">
+              <div class="size-14 shrink-0 rounded-lg bg-slate-200"></div>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-medium">Samsung Universe 9</p>
+                <p class="text-xs text-slate-500">$1,249 each</p>
+                <div class="mt-2 flex items-center gap-2">
+                  <div class="inline-flex items-center rounded-lg border border-slate-300 text-sm">
+                    <button class="px-2 py-0.5 hover:bg-slate-100" aria-label="Decrease quantity">−</button>
+                    <span class="w-6 text-center">2</span>
+                    <button class="px-2 py-0.5 hover:bg-slate-100" aria-label="Increase quantity">+</button>
+                  </div>
+                  <button class="text-xs text-slate-500 hover:text-red-600">Remove</button>
+                </div>
+              </div>
+              <span class="text-sm font-semibold">$2,498</span>
+            </li>
+            <li class="flex gap-3 py-4">
+              <div class="size-14 shrink-0 rounded-lg bg-slate-200"></div>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-medium">iPhone 9</p>
+                <p class="text-xs text-slate-500">$549 each</p>
+                <div class="mt-2 flex items-center gap-2">
+                  <div class="inline-flex items-center rounded-lg border border-slate-300 text-sm">
+                    <button class="px-2 py-0.5 hover:bg-slate-100" aria-label="Decrease quantity">−</button>
+                    <span class="w-6 text-center">1</span>
+                    <button class="px-2 py-0.5 hover:bg-slate-100" aria-label="Increase quantity">+</button>
+                  </div>
+                  <button class="text-xs text-slate-500 hover:text-red-600">Remove</button>
+                </div>
+              </div>
+              <span class="text-sm font-semibold">$549</span>
+            </li>
+          </ul>
+
+          <!-- <CartSummary /> : total computed with useMemo -->
+          <div class="space-y-2 border-t border-slate-200 px-5 py-4 text-sm">
+            <div class="flex justify-between text-slate-600"><span>Subtotal</span><span>$3,047</span></div>
+            <div class="flex justify-between text-base font-bold"><span>Total</span><span>$3,047</span></div>
+            <a href="checkout.html" class="mt-3 block rounded-lg bg-indigo-600 py-2.5 text-center font-semibold text-white hover:bg-indigo-500">Go to checkout</a>
+          </div>
+        </div>
+
+        <!-- ===== State reference: empty cart ===== -->
+        <p class="mb-3 mt-8 text-xs font-semibold uppercase tracking-wider text-slate-400">State: empty cart</p>
+        <div class="rounded-xl border border-dashed border-slate-300 bg-white px-5 py-8 text-center text-sm text-slate-500">
+          Your cart is empty.
+        </div>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>
