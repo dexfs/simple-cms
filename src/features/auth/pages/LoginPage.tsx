@@ -1,45 +1,116 @@
+import {useState} from "react";
+
+type LoginFormValues = {
+    email: string,
+    password: string
+}
+
+type FormTouchedValues = Partial<Record<keyof LoginFormValues, boolean>>
+
+const initialFormValues: LoginFormValues = {
+    email: '',
+    password: ''
+}
+
+function validate(values: LoginFormValues) {
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isAValidEmail = !values.email.trim() ? 'Email é obrigatório'
+        : !EMAIL_RE.test(values.email) ? 'Email inválido'
+            : undefined;
+    const isValidPassword = !values.password.trim() ? 'Password é obrigatório': undefined
+
+
+    return {
+        ...(isAValidEmail && {email: isAValidEmail}),
+        ...(isValidPassword && {password: isValidPassword})
+    }
+}
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+async function login(email:string, password:string) {
+    await wait(1000)
+    if (email !== "eve.holt@reqres.in" || password !== "cityslicka") {
+        throw new Error("Invalid email or password.");   // failure = throw
+    }
+    return { token: "fake-token" };
+}
+
 export default function LoginPage() {
+    const [values, setValues] = useState<LoginFormValues>(initialFormValues)
+    const [touched, setTouched] = useState<FormTouchedValues>({})
+    const [isSubmiting, setIsSubmiting] = useState(false)
+    const [submitError, setSubmitError] = useState<string | null>(null)
+
+    const errors = validate(values)
+    const showEmailError = touched.email && errors.email;
+    const showPasswordError = touched.password && errors.password;
+
+    function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        setTouched({email:true, password:true})
+        if (Object.keys(errors).length > 0) return;
+        setIsSubmiting(true)
+        setSubmitError(null)
+        login(values.email, values.password)
+            .then(response => {
+                console.log({response}) // redirect?
+            })
+            .catch(error => {
+                const errorMessage = error instanceof Error ? error.message : 'Something went wrong'
+                setSubmitError(errorMessage)
+            })
+            .finally(() => setIsSubmiting(false))
+    }
+
     return (
         <>
-            {/*Brand side (hidden on mobile)*/}
-            <section className="hidden flex-col justify-between bg-indigo-600 p-12 text-indigo-50 lg:flex">
-                <a href="index.html" className="flex items-center gap-2 text-lg font-semibold text-white">
-                    <span className="grid size-9 place-items-center rounded-lg bg-white text-indigo-600">M</span>
-                    MiniShop
-                </a>
+            <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
+            <p className="mt-1 text-sm text-slate-600">Enter your email and password.</p>
+            <form className="mt-6 space-y-5" noValidate onSubmit={handleSubmit}>
+                {submitError &&
+                    <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                         role="alert">
+                        {submitError}
+                    </div>}
                 <div>
-                    <h1 className="text-3xl font-bold leading-tight text-white">Sign in to finish your order.</h1>
-                    <p className="mt-3 max-w-sm text-indigo-100">Your cart is kept while you log in.</p>
+                    <label htmlFor="email" className="block text-sm font-medium text-slate-700">Email</label>
+                    <input id="email"
+                           type="email"
+                           autoComplete="email"
+                           name="email"
+                           placeholder="you@example.com"
+                           className={`input-field${showEmailError ? ' input-field--error' : '' }`}
+                           value={values.email}
+                           onChange={(e) => setValues({...values, email: e.target.value})}
+                           onBlur={() => setTouched((prev) => ({...prev, email: true}))}
+                    />
+                    {showEmailError &&
+                        <p id="email-error" className="mt-1.5 text-xs text-red-600">{errors.email}.</p>}
                 </div>
-                <p className="text-sm text-indigo-200">Test account: eve.holt@reqres.in / cityslicka</p>
-            </section>
-            <section className="flex items-center justify-center px-4 py-12">
-                <div className="w-full max-w-sm">
-                    <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
-                    <p className="mt-1 text-sm text-slate-600">Enter your email and password.</p>
-                    <form className="mt-6 space-y-5" noValidate>
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-slate-700">Email</label>
-                            <input id="email" type="email" autoComplete="email" placeholder="you@example.com"
-                                   className="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"/>
-                        </div>
 
-                        <div>
-                            <label htmlFor="password"
-                                   className="block text-sm font-medium text-slate-700">Password</label>
-                            <input id="password" type="password" autoComplete="current-password" aria-invalid="true"
-                                   aria-describedby="password-error"
-                                   className="mt-1.5 block w-full rounded-lg border border-red-400 bg-white px-3 py-2 text-sm shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"/>
-                            <p id="password-error" className="mt-1.5 text-xs text-red-600">Password is required.</p>
-                        </div>
-
-                        <button type="submit"
-                                className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                            Sign in
-                        </button>
-                    </form>
+                <div>
+                    <label htmlFor="password"
+                           className="block text-sm font-medium text-slate-700">Password</label>
+                    <input id="password" type="password" autoComplete="current-password" aria-invalid="true"
+                           aria-describedby="password-error"
+                           className={`input-field${showPasswordError ? ' input-field--error' : '' }`}
+                           name="password"
+                           value={values.password}
+                           onChange={(e) => setValues({...values, password: e.target.value})}
+                           onBlur={() => setTouched((prev) => ({...prev, password: true}))}
+                    />
+                    {showPasswordError && <p id="password-error" className="mt-1.5 text-xs text-red-600">{errors.password}</p>}
                 </div>
-            </section>
+
+                <button type="submit"
+                        className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        disabled={isSubmiting}
+                >
+
+                    {!isSubmiting ? 'Sign in' : 'Logging...'}
+                </button>
+            </form>
         </>
     )
 }
