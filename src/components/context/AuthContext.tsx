@@ -10,20 +10,39 @@ type AuthContextValues = {
 
 const AuthContext = createContext<AuthContextValues | null>(null)
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
+/**
+ * curl -X POST https://reqres.in/api/login \
+ *   -H "Content-Type: application/json" \
+ *   -d '{"email":"eve.holt@reqres.in","password":"cityslicka"}'
+ *
+ * Error (returns 400 with {"error":"Missing password"}):
+ *
+ * curl -X POST https://reqres.in/api/login \
+ *   -H "Content-Type: application/json" \
+ *   -d '{"email":"eve.holt@reqres.in"}'
+ */
+function makeLoginRequest(payload: {email: string, password: string}) {
+    return fetch('https://reqres.in/api/login', {
+        headers: {"Content-Type": 'application/json'},
+        method: "POST",
+        body: JSON.stringify(payload)
+    })
+}
 
 export function AuthProvider({children}: {children: React.ReactNode}) {
-    const [user, setUser] = useState<{email: string}| null>(null)
+    const [user, setUser] = useState<{email: string} | null>(null)
     const [token, setToken] = useState<string | null>(null)
 
     async function login(email: string, password: string) {
-        await wait(1000)
-        if (email !== "eve.holt@reqres.in" || password !== "cityslicka") {
-            throw new Error("Invalid email or password.");   // failure = throw
+        const response = await makeLoginRequest({email, password})
+        const data: {token?: string, error?: string} = await response.json()
+        if (!response.ok || !data.token) {
+            throw new Error(data.error ?? "Login failed!")
         }
+
         const newUser = { email }
-        const newToken = "fake-token"
+        const newToken = data.token
         const tokenInfo = {token: newToken, user: newUser}
         setUser(newUser)
         setToken(newToken)
