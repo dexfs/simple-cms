@@ -1,7 +1,7 @@
 import {createContext, useContext, useEffect, useState} from "react";
 
 type AuthContextValues = {
-    user: {email: string} | null,
+    user: User | null,
     token: string | null,
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
@@ -12,22 +12,18 @@ const AuthContext = createContext<AuthContextValues | null>(null)
 
 
 type StoredAuthValues = {
-    user: {
-        email: string
-    },
+    user: User,
     token: string
 }
-/**
- * curl -X POST https://reqres.in/api/login \
- *   -H "Content-Type: application/json" \
- *   -d '{"email":"eve.holt@reqres.in","password":"cityslicka"}'
- *
- * Error (returns 400 with {"error":"Missing password"}):
- *
- * curl -X POST https://reqres.in/api/login \
- *   -H "Content-Type: application/json" \
- *   -d '{"email":"eve.holt@reqres.in"}'
- */
+
+type User = {
+    id: number,
+    email: string,
+    first_name: string,
+    last_name: string,
+    avatar: string
+}
+
 async function makeLoginRequest(payload: {email: string, password: string}) {
     return fetch('https://reqres.in/api/login', {
         headers: {"Content-Type": 'application/json'},
@@ -36,13 +32,22 @@ async function makeLoginRequest(payload: {email: string, password: string}) {
     })
 }
 
+async function makeUsersRequest() {
+    return fetch('https://reqres.in/api/users?page=1')
+}
+
+function findLoggedUserInfo(users: User[], email:string): User | undefined {
+    return users.find(u => u.email.toLowerCase() === email.toLowerCase());
+}
+
 function readStoredAuth(): StoredAuthValues | null  {
     const stored = localStorage.getItem('auth')
     if (!stored) return null
 
     try {
         const info = JSON.parse(stored)
-        if (typeof info?.token !== 'string' || typeof info.user?.email !== 'string') {
+        const isInvalidInfo = typeof info?.token !== 'string' || typeof info.user?.email !== 'string' || typeof info.user?.first_name !== 'string'
+        if (isInvalidInfo) {
             localStorage.removeItem('auth')
             return null
         }
@@ -69,7 +74,7 @@ function LoadingPage() {
 }
 
 export function AuthProvider({children}: { children: React.ReactNode }) {
-    const [user, setUser] = useState<{ email: string } | null>(null)
+    const [user, setUser] = useState<User | null>(null)
     const [token, setToken] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
 
@@ -84,14 +89,24 @@ export function AuthProvider({children}: { children: React.ReactNode }) {
 
     async function login(email: string, password: string) {
         const response = await makeLoginRequest({email, password})
-        const data: {token?: string, error?: string} = await response.json()
-        if (!response.ok || !data.token) {
-            throw new Error(data.error ?? "Login failed!")
+        const authData: {token?: string, error?: string} = await response.json()
+        if (!response.ok || !authData.token) {
+            throw new Error(authData.error ?? "Login failed!")
         }
 
-        const newUser = { email }
-        const newToken = data.token
+        const responseUsers = await makeUsersRequest()
+        if (!responseUsers.ok) {
+            throw new Error( 'Login failed!')
+        }
+
+        const usersData: {data: User[]} = await responseUsers.json()
+        const newUser = findLoggedUserInfo(usersData.data, email)
+        if (!newUser) {
+            throw new Error('User not found!')
+        }
+        const newToken = authData.token
         const tokenInfo = {token: newToken, user: newUser}
+
         setUser(newUser)
         setToken(newToken)
         localStorage.setItem('auth', JSON.stringify(tokenInfo))
