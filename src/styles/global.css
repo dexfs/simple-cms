@@ -13,4 +13,10 @@
         @apply border-red-400
         focus:border-red-500 focus:ring-red-500/20;
     }
+    .active-page {
+        @apply text-indigo-600
+    }
+    .normal-link {
+        @apply text-slate-600 hover:text-slate-900
+    }
 }
