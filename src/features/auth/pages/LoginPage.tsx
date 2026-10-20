@@ -29,7 +29,7 @@ function validate(values: LoginFormValues) {
 
 
 export default function LoginPage() {
-    const {login, token} = useAuth()
+    const {login} = useAuth()
     const [values, setValues] = useState<LoginFormValues>(initialFormValues)
     const [touched, setTouched] = useState<FormTouchedValues>({})
     const [isSubmiting, setIsSubmiting] = useState(false)
@@ -56,7 +56,7 @@ export default function LoginPage() {
     return (
         <>
             <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
-            <p className="mt-1 text-sm text-slate-600">Enter your email and password. Token {token}</p>
+            <p className="mt-1 text-sm text-slate-600">Enter your email and password.</p>
             <form className="mt-6 space-y-5" noValidate onSubmit={handleSubmit}>
                 {submitError &&
                     <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
