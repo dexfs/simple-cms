@@ -20,7 +20,7 @@ export function InternalHeader() {
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 border-l border-slate-200 pl-3">
                         <span
-                            className="grid size-8 place-items-center rounded-full bg-slate-200 text-xs font-semibold">{auth?.user?.first_name.slice(0,3).toUpperCase()}</span>
+                            className="grid size-8 place-items-center rounded-full bg-slate-200 text-xs font-semibold">{auth?.user?.firstName.slice(0,3).toUpperCase()}</span>
                         <button className="text-sm text-slate-600 hover:text-slate-900"
                                 onClick={() => auth.logout()}>Logout
                         </button>

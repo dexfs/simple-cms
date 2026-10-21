@@ -2,27 +2,24 @@ import {useState} from "react";
 import {useAuth} from "../../../components/context/AuthContext.tsx";
 
 type LoginFormValues = {
-    email: string,
+    username: string,
     password: string
 }
 
 type FormTouchedValues = Partial<Record<keyof LoginFormValues, boolean>>
 
 const initialFormValues: LoginFormValues = {
-    email: '',
+    username: '',
     password: ''
 }
 
 function validate(values: LoginFormValues) {
-    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const isAValidEmail = !values.email.trim() ? 'Email é obrigatório'
-        : !EMAIL_RE.test(values.email) ? 'Email inválido'
-            : undefined;
+    const isValidUsername = !values.username.trim() ? 'Username é obrigatório' : undefined
     const isValidPassword = !values.password.trim() ? 'Password é obrigatório': undefined
 
 
     return {
-        ...(isAValidEmail && {email: isAValidEmail}),
+        ...(isValidUsername && {username: isValidUsername}),
         ...(isValidPassword && {password: isValidPassword})
     }
 }
@@ -36,16 +33,16 @@ export default function LoginPage() {
     const [submitError, setSubmitError] = useState<string | null>(null)
 
     const errors = validate(values)
-    const showEmailError = touched.email && errors.email;
+    const showUsernameError = touched.username && errors.username;
     const showPasswordError = touched.password && errors.password;
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        setTouched({email:true, password:true})
+        setTouched({username:true, password:true})
         if (Object.keys(errors).length > 0) return;
         setIsSubmiting(true)
         setSubmitError(null)
-        login(values.email, values.password)
+        login(values.username, values.password)
             .catch(error => {
                 const errorMessage = error instanceof Error ? error.message : 'Something went wrong'
                 setSubmitError(errorMessage)
@@ -56,7 +53,7 @@ export default function LoginPage() {
     return (
         <>
             <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
-            <p className="mt-1 text-sm text-slate-600">Enter your email and password.</p>
+            <p className="mt-1 text-sm text-slate-600">Enter your username and password.</p>
             <form className="mt-6 space-y-5" noValidate onSubmit={handleSubmit}>
                 {submitError &&
                     <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
@@ -64,25 +61,26 @@ export default function LoginPage() {
                         {submitError}
                     </div>}
                 <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-slate-700">Email</label>
-                    <input id="email"
-                           type="email"
-                           autoComplete="email"
-                           name="email"
-                           placeholder="you@example.com"
-                           className={`input-field${showEmailError ? ' input-field--error' : '' }`}
-                           value={values.email}
-                           onChange={(e) => setValues({...values, email: e.target.value})}
-                           onBlur={() => setTouched((prev) => ({...prev, email: true}))}
+                    <label htmlFor="username" className="block text-sm font-medium text-slate-700">Username</label>
+                    <input id="username"
+                           type="text"
+                           autoComplete="username"
+                           name="username"
+                           placeholder="username"
+                           className={`input-field${showUsernameError ? ' input-field--error' : '' }`}
+                           value={values.username}
+                           onChange={(e) => setValues({...values, username: e.target.value})}
+                           onBlur={() => setTouched((prev) => ({...prev, username: true}))}
+                           aria-invalid={!!showUsernameError}
                     />
-                    {showEmailError &&
-                        <p id="email-error" className="mt-1.5 text-xs text-red-600">{errors.email}.</p>}
+                    {showUsernameError &&
+                        <p id="username-error" className="mt-1.5 text-xs text-red-600">{errors.username}.</p>}
                 </div>
 
                 <div>
                     <label htmlFor="password"
                            className="block text-sm font-medium text-slate-700">Password</label>
-                    <input id="password" type="password" autoComplete="current-password" aria-invalid="true"
+                    <input id="password" type="password" autoComplete="current-password" aria-invalid={!!showPasswordError}
                            aria-describedby="password-error"
                            className={`input-field${showPasswordError ? ' input-field--error' : '' }`}
                            name="password"

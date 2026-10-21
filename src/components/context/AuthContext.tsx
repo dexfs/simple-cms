@@ -1,9 +1,10 @@
 import {createContext, useContext, useEffect, useState} from "react";
+import {request} from "../../lib/http.ts";
 
 type AuthContextValues = {
     user: User | null,
     token: string | null,
-    login: (email: string, password: string) => Promise<void>;
+    login: (username: string, password: string) => Promise<void>;
     logout: () => void;
 }
 
@@ -18,26 +19,24 @@ type StoredAuthValues = {
 
 type User = {
     id: number,
+    username: string
     email: string,
-    first_name: string,
-    last_name: string,
-    avatar: string
+    firstName: string
+    lastName: string
+    gender: string
+    image: string
 }
 
-async function makeLoginRequest(payload: {email: string, password: string}) {
-    return fetch('https://reqres.in/api/login', {
-        headers: {"Content-Type": 'application/json'},
+type LoginResponse = User & {
+    accessToken: string
+    refreshToken: string
+}
+
+async function makeLoginRequest(payload: {username: string, password: string}) {
+    return request<LoginResponse>('/auth/login', {
         method: "POST",
-        body: JSON.stringify(payload)
+        body: payload
     })
-}
-
-async function makeUsersRequest() {
-    return fetch('https://reqres.in/api/users?page=1')
-}
-
-function findLoggedUserInfo(users: User[], email:string): User | undefined {
-    return users.find(u => u.email.toLowerCase() === email.toLowerCase());
 }
 
 function readStoredAuth(): StoredAuthValues | null  {
@@ -46,7 +45,7 @@ function readStoredAuth(): StoredAuthValues | null  {
 
     try {
         const info = JSON.parse(stored)
-        const isInvalidInfo = typeof info?.token !== 'string' || typeof info.user?.email !== 'string' || typeof info.user?.first_name !== 'string'
+        const isInvalidInfo = typeof info?.token !== 'string' || typeof info?.user.email !== 'string' || typeof info?.user.firstName !== 'string'
         if (isInvalidInfo) {
             localStorage.removeItem('auth')
             return null
@@ -87,29 +86,18 @@ export function AuthProvider({children}: { children: React.ReactNode }) {
         setLoading(false)
     }, []);
 
-    async function login(email: string, password: string) {
-        const response = await makeLoginRequest({email, password})
-        const authData: {token?: string, error?: string} = await response.json()
-        if (!response.ok || !authData.token) {
-            throw new Error(authData.error ?? "Login failed!")
+    async function login(username: string, password: string) {
+        const authData: LoginResponse = await makeLoginRequest({username, password})
+        if (!authData.accessToken) {
+            throw new Error("Login failed!")
         }
 
-        const responseUsers = await makeUsersRequest()
-        if (!responseUsers.ok) {
-            throw new Error( 'Login failed!')
-        }
+        const {accessToken, refreshToken: _, ...user} = authData
+        const newToken = accessToken
 
-        const usersData: {data: User[]} = await responseUsers.json()
-        const newUser = findLoggedUserInfo(usersData.data, email)
-        if (!newUser) {
-            throw new Error('User not found!')
-        }
-        const newToken = authData.token
-        const tokenInfo = {token: newToken, user: newUser}
-
-        setUser(newUser)
+        setUser(user)
         setToken(newToken)
-        localStorage.setItem('auth', JSON.stringify(tokenInfo))
+        localStorage.setItem('auth', JSON.stringify({token: newToken, user}))
     }
 
     function logout() {
