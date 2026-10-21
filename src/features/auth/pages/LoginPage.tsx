@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {useAuth} from "../../../components/context/AuthContext.tsx";
 import type {FormTouchedValues, LoginFormValues} from "../schemas.ts";
+import {HttpError} from "../../../lib/http.ts";
 
 const initialFormValues: LoginFormValues = {
     username: '',
@@ -38,8 +39,12 @@ export default function LoginPage() {
         setSubmitError(null)
         login(values.username, values.password)
             .catch(error => {
-                const errorMessage = error instanceof Error ? error.message : 'Something went wrong'
-                setSubmitError(errorMessage)
+                if (error instanceof HttpError) {
+                    setSubmitError(error.message)
+                } else {
+                    console.error(error) // in production env, we can change here and sending to a monitoring service such as Sentry
+                    setSubmitError('Something went wrong. Please try again.')
+                }
             })
             .finally(() => setIsSubmiting(false))
     }
