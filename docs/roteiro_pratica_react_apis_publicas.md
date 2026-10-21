@@ -25,9 +25,26 @@ type AuthState = {
 // O contexto deve oferecer login(email, password) e logout().
 ```
 
+## Dia 1.5 — Migrar a autenticação para DummyJSON
+
+**API:** [DummyJSON](https://dummyjson.com/docs/auth) (`POST /auth/login`, `GET /auth/me`, `POST /auth/refresh`)
+
+**Motivo:** usar uma única API para auth, posts e produtos. Com ReqRes + JSONPlaceholder, o usuário logado não existe na API de posts.
+
+- Trocar o login para `POST /auth/login` com `{ username, password }` (conta de teste: `emilys` / `emilyspass`). O campo do formulário passa de e-mail para username.
+- Usar a resposta do login, que já traz `accessToken`, `refreshToken` e os dados do usuário. Remover a busca em `/api/users`.
+- Ler a mensagem de erro de `message` (no ReqRes era `error`).
+- Atualizar o tipo `User` (`id`, `username`, `email`, `firstName`, `lastName`, `image`), o `readStoredAuth` e o header (iniciais e avatar).
+- Ao iniciar, validar o token salvo com `GET /auth/me` (`Authorization: Bearer <token>`); se der 401, limpar a sessão.
+- Opcional: renovar o token com `POST /auth/refresh` quando receber 401.
+
+**Praticar:** troca de contrato de API, header `Authorization`, validação de sessão no carregamento (o estado `loading` passa a esperar uma requisição real) e tratamento de 401.
+
 ## Dia 2 — Listagem e formulário de criação
 
-**API:** [JSONPlaceholder](https://jsonplaceholder.typicode.com/) (`/users`, `/posts`, `/comments`)
+**API:** [DummyJSON](https://dummyjson.com/docs/posts) (`/posts`, `/posts/add`, `/posts/:id/comments`, `/auth/posts` com token)
+
+> `POST /posts/add` responde 201, mas sempre com `id: 252` e não salva nada. Gere um id local para o novo post.
 
 - Criar uma página que lista posts, disponibilizando os dados por contexto.
 - Criar um formulário para publicar um post, validando título obrigatório e tamanho mínimo.
