@@ -53,6 +53,17 @@ type AuthState = {
 
 **Praticar:** `useEffect`, `fetch`, `AbortController`, cleanup de efeitos, estados de interface, formulários controlados e atualização de estado global.
 
+## Dia 2.5 — Modais com `createPortal`
+
+**Referência:** [createPortal — react.dev](https://react.dev/reference/react-dom/createPortal)
+
+- Criar um componente `Modal` reutilizável que renderiza fora da árvore do layout (em `document.body` ou num `#modal-root`) via `createPortal`.
+- Abrir o formulário de criação de post do Dia 2 dentro desse modal.
+- Fechar com o botão, com `Esc` e com clique no overlay (sem fechar ao clicar dentro do conteúdo).
+- Acessibilidade: `role="dialog"`, `aria-modal="true"`, foco vai para o modal ao abrir e volta para o botão que o abriu ao fechar.
+
+**Praticar:** `createPortal`, por que o portal escapa de `overflow: hidden`/`z-index` do pai, propagação de eventos React pelo portal (segue a árvore de componentes, não a do DOM), contexto funcionando dentro do portal, `useEffect` com listener de teclado e cleanup, `useRef` para foco.
+
 ## Dia 3 — Busca, filtros e Context API de carrinho
 
 **API:** [DummyJSON](https://dummyjson.com/) (`/products?search=`)
