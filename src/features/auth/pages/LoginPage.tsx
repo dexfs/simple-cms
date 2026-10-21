@@ -1,12 +1,6 @@
 import {useState} from "react";
 import {useAuth} from "../../../components/context/AuthContext.tsx";
-
-type LoginFormValues = {
-    username: string,
-    password: string
-}
-
-type FormTouchedValues = Partial<Record<keyof LoginFormValues, boolean>>
+import type {FormTouchedValues, LoginFormValues} from "../schemas.ts";
 
 const initialFormValues: LoginFormValues = {
     username: '',

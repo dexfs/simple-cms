@@ -1,5 +1,11 @@
 import {createContext, useContext, useEffect, useState} from "react";
-import {request} from "../../lib/http.ts";
+import {HttpError, request} from "../../lib/http.ts";
+import {
+    LoginResponseSchema, StoredAuthSchema,
+    type StoredAuthValues,
+    type User,
+    UserSchema
+} from "../../features/auth/schemas.ts";
 
 type AuthContextValues = {
     user: User | null,
@@ -8,34 +14,18 @@ type AuthContextValues = {
     logout: () => void;
 }
 
-
 const AuthContext = createContext<AuthContextValues | null>(null)
 
 
-type StoredAuthValues = {
-    user: User,
-    token: string
-}
-
-type User = {
-    id: number,
-    username: string
-    email: string,
-    firstName: string
-    lastName: string
-    gender: string
-    image: string
-}
-
-type LoginResponse = User & {
-    accessToken: string
-    refreshToken: string
-}
-
 async function makeLoginRequest(payload: {username: string, password: string}) {
-    return request<LoginResponse>('/auth/login', {
+    return request<unknown>('/auth/login', {
         method: "POST",
         body: payload
+    })
+}
+async function fetchMe(token: string, signal: AbortSignal) {
+    return request<unknown>('/auth/me', {
+        token, signal
     })
 }
 
@@ -45,12 +35,12 @@ function readStoredAuth(): StoredAuthValues | null  {
 
     try {
         const info = JSON.parse(stored)
-        const isInvalidInfo = typeof info?.token !== 'string' || typeof info?.user.email !== 'string' || typeof info?.user.firstName !== 'string'
-        if (isInvalidInfo) {
+        const result = StoredAuthSchema.safeParse(info)
+        if (!result.success) {
             localStorage.removeItem('auth')
             return null
         }
-        return info
+        return result.data
     } catch {
         localStorage.removeItem('auth')
         return null
@@ -72,32 +62,52 @@ function LoadingPage() {
     )
 }
 
+const isAborted = (signal: AbortSignal) => signal.aborted
+
 export function AuthProvider({children}: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
     const [token, setToken] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const data = readStoredAuth()
-        if (data) {
-            setToken(data.token)
-            setUser(data.user)
+        const controller = new AbortController()
+        async function restore() {
+            const data = readStoredAuth()
+            try {
+                if (!data) {
+                    setLoading(false);
+                    return;
+                }
+                const me = await fetchMe(data.token, controller.signal)
+                if (isAborted(controller.signal)) return;
+                const newUser = UserSchema.parse(me)
+                setUser(newUser)
+                setToken(data.token)
+            } catch (e) {
+                if (isAborted(controller.signal)) return;
+                if (e instanceof HttpError && e.status === 401) localStorage.removeItem('auth')
+                setToken(null)
+                setUser(null)
+            }
+            finally {
+                if (!isAborted(controller.signal)) setLoading(false);
+            }
         }
-        setLoading(false)
+        restore()
+
+        return () => controller.abort()
     }, []);
 
     async function login(username: string, password: string) {
-        const authData: LoginResponse = await makeLoginRequest({username, password})
-        if (!authData.accessToken) {
-            throw new Error("Login failed!")
-        }
+        const loginResponse = await makeLoginRequest({username, password})
+        const authData = LoginResponseSchema.parse(loginResponse)
 
-        const {accessToken, refreshToken: _, ...user} = authData
-        const newToken = accessToken
+        const newToken = authData.accessToken
+        const newUser = UserSchema.parse(authData)
 
-        setUser(user)
+        setUser(newUser)
         setToken(newToken)
-        localStorage.setItem('auth', JSON.stringify({token: newToken, user}))
+        localStorage.setItem('auth', JSON.stringify({token: newToken, user: newUser}))
     }
 
     function logout() {
@@ -123,8 +133,3 @@ export function useAuth() {
 
     return context
 }
-
-
-
-
-
