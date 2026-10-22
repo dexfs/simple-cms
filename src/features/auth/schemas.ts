@@ -19,8 +19,8 @@ export const StoredAuthSchema = z.object({
     token: z.string().min(1)
 })
 export const LoginFormSchema  = z.object({
-    username: z.string().default(''),
-    password: z.string().default('')
+    username: z.string().min(1, 'User is required'),
+    password: z.string().min(1, 'Password is required')
 })
 
 export type StoredAuthValues = z.infer<typeof StoredAuthSchema>
