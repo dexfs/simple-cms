@@ -1,24 +1,30 @@
 import {useState} from "react";
 import {useAuth} from "../../../components/context/AuthContext.tsx";
-import type {FormTouchedValues, LoginFormValues} from "../schemas.ts";
+import {LoginFormSchema, type LoginFormValues} from "../schemas.ts";
 import {HttpError} from "../../../lib/http.ts";
+import {z} from "zod";
 
 const initialFormValues: LoginFormValues = {
     username: '',
     password: ''
 }
 
-function validate(values: LoginFormValues) {
-    const isValidUsername = !values.username.trim() ? 'Username é obrigatório' : undefined
-    const isValidPassword = !values.password.trim() ? 'Password é obrigatório': undefined
+type LoginFormErrors = Partial<Record<keyof LoginFormValues, string>>
+type FormTouchedValues = Partial<Record<keyof LoginFormValues, boolean>>
 
+function validate(values: LoginFormValues): LoginFormErrors {
+    const result = LoginFormSchema.safeParse(values)
 
+    if (result.success) return {}
+
+    const {fieldErrors} = z.flattenError(result.error)
+    const username = fieldErrors.username?.[0]
+    const password = fieldErrors.password?.[0]
     return {
-        ...(isValidUsername && {username: isValidUsername}),
-        ...(isValidPassword && {password: isValidPassword})
+        ...(username && { username }),
+        ...(password && { password }),
     }
 }
-
 
 export default function LoginPage() {
     const {login} = useAuth()
@@ -60,7 +66,7 @@ export default function LoginPage() {
                         {submitError}
                     </div>}
                 <div>
-                    <label htmlFor="username" className="block text-sm font-medium text-slate-700">Username</label>
+                    <label htmlFor="username" className="block text-sm font-medium text-slate-700">username</label>
                     <input id="username"
                            type="text"
                            autoComplete="username"
@@ -73,12 +79,12 @@ export default function LoginPage() {
                            aria-invalid={!!showUsernameError}
                     />
                     {showUsernameError &&
-                        <p id="username-error" className="mt-1.5 text-xs text-red-600">{errors.username}.</p>}
+                        <p id="username-error" className="mt-1.5 text-xs text-red-600">{errors.username}</p>}
                 </div>
 
                 <div>
                     <label htmlFor="password"
-                           className="block text-sm font-medium text-slate-700">Password</label>
+                           className="block text-sm font-medium text-slate-700">password</label>
                     <input id="password" type="password" autoComplete="current-password" aria-invalid={!!showPasswordError}
                            aria-describedby="password-error"
                            className={`input-field${showPasswordError ? ' input-field--error' : '' }`}
@@ -94,7 +100,6 @@ export default function LoginPage() {
                         className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         disabled={isSubmiting}
                 >
-
                     {!isSubmiting ? 'Sign in' : 'Logging...'}
                 </button>
             </form>
