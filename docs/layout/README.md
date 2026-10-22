@@ -48,5 +48,6 @@ UI state should look so you can render it with conditionals.
   re-render on every parent render.
 - **Forms:** show field errors after blur or submit, not on first keystroke.
   Link errors with `aria-describedby` and set `aria-invalid`, as in the layouts.
-- **JSONPlaceholder POST** always returns `id: 101`. Generate a local id for
-  keys, or new posts will collide.
+- **DummyJSON `POST /posts/add`** returns 201 but always responds with
+  `id: 252` and saves nothing. Generate a local id for keys, or new posts will
+  collide.
