@@ -1,4 +1,4 @@
-import {createContext, useContext, useEffect, useState} from "react";
+import {createContext, useCallback, useContext, useEffect, useState} from "react";
 import {HttpError, request} from "../../lib/http.ts";
 import {
     LoginResponseSchema, StoredAuthSchema,
@@ -15,7 +15,6 @@ type AuthContextValues = {
 }
 
 const AuthContext = createContext<AuthContextValues | null>(null)
-
 
 async function makeLoginRequest(payload: {username: string, password: string}) {
     return request<unknown>('/auth/login', {
@@ -109,12 +108,12 @@ export function AuthProvider({children}: { children: React.ReactNode }) {
         setToken(newToken)
         localStorage.setItem('auth', JSON.stringify({token: newToken, user: newUser}))
     }
-
-    function logout() {
+    const logout= useCallback(() => {
         setToken(null)
         setUser(null)
         localStorage.removeItem('auth')
-    }
+    }, [])
+
 
     return (
         <AuthContext.Provider value={{
