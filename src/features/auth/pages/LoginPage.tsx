@@ -37,7 +37,7 @@ export default function LoginPage() {
     const showUsernameError = touched.username && errors.username;
     const showPasswordError = touched.password && errors.password;
 
-    function handleSubmit(e: React.FormEvent) {
+    function handleSubmit(e: React.SubmitEvent) {
         e.preventDefault();
         setTouched({username:true, password:true})
         if (Object.keys(errors).length > 0) return;
