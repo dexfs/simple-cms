@@ -26,6 +26,16 @@ function validate(values: PostFormValues): PostFormErrors {
     }
 }
 
+function SuccessBox() {
+    return <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
+              role="status">Post published.</p>
+}
+
+function ErrorBox({message}: { message: string }) {
+    return <p className="border rounded-lg px-3 py-2 text-sm bg-red-50 border-red-200 text-red-700"
+              role="alert">{message}</p>;
+}
+
 export default function PostFormCreate() {
     const {addPost} = usePost()
     const [values, setValues] = useState<PostFormValues>(initialFormValues)
@@ -46,7 +56,7 @@ export default function PostFormCreate() {
         setValues(initialFormValues)
     }
 
-    function handleOnBlur(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    function handleOnBlur(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
         const {name} = e.target
         setTouched((prev) => ({...prev, [name]: true}))
     }
@@ -93,7 +103,7 @@ export default function PostFormCreate() {
                         id="title" type="text" aria-invalid={!!showTitleError}
                         name="title"
                         value={values.title}
-                        aria-describedby="title-error"
+                        aria-describedby={showTitleError ? 'title-error' : undefined}
                         className={`input-field${showTitleError ? ' input-field--error' : ''}`}
                         onBlur={handleOnBlur}
                         onChange={handleChange}
@@ -107,6 +117,7 @@ export default function PostFormCreate() {
                 <div>
                     <label htmlFor="body" className="block text-sm font-medium text-slate-700">Body</label>
                     <textarea id="body" rows={5} placeholder="Write something…"
+                              aria-describedby={showBodyError ? 'body-error' : undefined}
                               name="body"
                               value={values.body}
                               onChange={handleChange}
@@ -122,7 +133,7 @@ export default function PostFormCreate() {
                     <button type="submit"
                             className="flex-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                     disabled={isSubmiting}>
-                        Publish
+                        { isSubmiting ? 'Publishing...':'Publish' }
                     </button>
                     <button type="button"
                             onClick={handleClearForm}
@@ -131,11 +142,9 @@ export default function PostFormCreate() {
                 </div>
 
                 {/*Success feedback after POST*/}
-                {success && <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
-                   role="status">Post published.</p>}
+                {success && <SuccessBox />}
                 {/*Error feedback after POST*/}
-                {submitError && <p className="rounded-lg px-3 py-2 text-sm bg-red-50 border-red-200 text-red-700"
-                   role="alert">{submitError}</p>}
+                {submitError && <ErrorBox message={submitError} />}
 
             </form>
         </aside>

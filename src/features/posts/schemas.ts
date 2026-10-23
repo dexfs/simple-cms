@@ -16,9 +16,9 @@ export const PostListSchema = z.object({
 
 
 export const PostFormSchema =z.object({
-    title: z.string().min(5, 'Title must have at least 5 characters.')
-        .max(100, 'Title must have at max 100 characters.'),
-    body: z.string().max(255)
+    title: z.string().trim().min(5, 'Title must have at least 5 characters.')
+        .max(100, 'Title must have at most 100 characters.'),
+    body: z.string().max(255, 'Body must have at most 255 characters')
 })
 
 export type Post = z.infer<typeof PostSchema>

@@ -1,8 +1,8 @@
 import {createContext, useContext, useEffect, useState} from "react";
 import {HttpError, request} from "../../../lib/http.ts";
-import { PostFormSchema, type PostFormValues, type PostList, PostListSchema, PostSchema} from "../schemas.ts";
+import { type PostFormValues, type PostList, PostListSchema, PostSchema} from "../schemas.ts";
 import {useAuth} from "../../../components/context/AuthContext.tsx";
-import {z} from "zod";
+
 
 type PostContextValues = {
     posts: PostList
@@ -15,11 +15,7 @@ type PostContextValues = {
 const EMPTY_POST_LIST: PostList = {posts: [], total: 0, skip: 0, limit: 0}
 const PostContext = createContext<PostContextValues | null>(null)
 
-const CreatePostSchema = PostFormSchema.extend({
-    userId: z.number(),
-})
-
-type CreatePostRequestValues = z.infer<typeof CreatePostSchema>
+type CreatePostRequestValues = PostFormValues & {userId: number}
 
 function makeCreatePostRequest(payload: CreatePostRequestValues, token: string) {
     return request<unknown>('/auth/posts/add', {
@@ -87,7 +83,7 @@ export function PostProvider ({children}: { children: React.ReactNode }) {
 
     return (
         <PostContext.Provider value={{
-            posts, loading, error, reloadPosts, addPost: addPost
+            posts, loading, error, reloadPosts, addPost
         }}>
             {children}
         </PostContext.Provider>
