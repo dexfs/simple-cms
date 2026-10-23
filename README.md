@@ -46,8 +46,8 @@ The full plan, in Portuguese, is in
 | 1 | Auth context, login form, protected routes | ✅ Done |
 | 1.5 | Move auth to DummyJSON (`/auth/login`, `/auth/me`) and validate with Zod | ✅ Done (token refresh not done) |
 | 2 | Posts: list with loading / error / retry / empty states | ✅ Done |
-| 2 | Posts: create form | ⏳ Next |
-| 2.5 | Modals with `createPortal` | ⏳ Planned |
+| 2 | Posts: create form | ✅ Done |
+| 2.5 | Modals with `createPortal` | ⏳ Next |
 | 3 | Product search with debounce, filters, cart context | ⏳ Planned |
 | 4 | Final project: mini e-commerce with checkout | ⏳ Planned |
 
@@ -125,6 +125,13 @@ generic message.
   `reloadKey` that the effect depends on.
 - `PostPage` renders exactly one state with early returns, in this order:
   loading → error → empty → list.
+- `PostFormCreate` validates with `PostFormSchema` and shows field errors after
+  blur or submit. Publish is disabled while the request runs.
+- `addPost` posts to `/auth/posts/add` with the user id. DummyJSON always
+  returns `id: 252`, so the new post gets a local id from `Date.now()` and goes
+  to the top of the list. Retry reloads from the API, so local posts disappear.
+- After a successful POST the form clears and shows a success message. On
+  failure the text stays and the error is shown.
 
 ## Testing failure states
 
